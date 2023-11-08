@@ -19,7 +19,7 @@ public class OpenApiConfig {
                         .license(
                                 new License()
                                         .name("Source Code")
-                                        .url("https://github.com/Krish-Lakhani/Twitter")
+                                        .url("https://github.com/yashsojitra65/Twitter_Clone")
                         )
         );
     }
