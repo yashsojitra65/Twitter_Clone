@@ -3,12 +3,11 @@ package com.Twitter.com.Services;
 import com.Twitter.com.Model.*;
 import com.Twitter.com.Model.dto.Credential;
 import com.Twitter.com.Model.dto.PostDto;
-import com.Twitter.com.Services.utility.PasswordEncrypter;
-import com.insta.instagram.Model.*;
 import com.Twitter.com.Repositroy.AdminRepo;
 import com.Twitter.com.Repositroy.PostRepo;
 import com.Twitter.com.Repositroy.UserRepo;
 import com.Twitter.com.Services.utility.OTPGenerator;
+import com.Twitter.com.Services.utility.PasswordEncrypter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

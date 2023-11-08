@@ -5,7 +5,6 @@ import com.Twitter.com.Model.dto.Credential;
 import com.Twitter.com.Model.dto.PostDto;
 import com.Twitter.com.Services.FollowService;
 import com.Twitter.com.Services.UserService;
-import com.insta.instagram.Model.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
