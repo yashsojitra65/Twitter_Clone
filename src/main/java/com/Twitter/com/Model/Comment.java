@@ -20,9 +20,6 @@ public class Comment {
     @Column(nullable = false)
     private String commentBody;
 
-//    @JsonProperty(access = JsonProperty.Access.READ_ONLY) // hide this in json but not in database table column
-//    private LocalDateTime commentCreationTimeStamp;
-//
     @ManyToOne
     @JoinColumn(name = "fk_comment_post_id")
     private Post twitterPost;

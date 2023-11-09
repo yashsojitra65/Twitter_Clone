@@ -35,7 +35,7 @@ public class UserController {
 
 
 
-    @GetMapping("/SignIn")
+    @PostMapping("/SignIn")
     @Operation(
             summary = "User Sign In",
             description = "Allow users to sign in securely to the Twitter clone platform.",
