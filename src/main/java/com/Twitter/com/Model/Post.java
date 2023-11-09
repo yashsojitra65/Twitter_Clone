@@ -10,16 +10,12 @@ import java.util.Date;
 @Entity
 @Data
 public class Post {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Integer postId;
     public String title;
     public String description;
     public String url;
-
-//    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-//    public LocalDateTime dateTime;
 
     public String time;
     @PrePersist

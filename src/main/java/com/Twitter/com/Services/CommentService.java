@@ -11,11 +11,6 @@ public class CommentService {
     @Autowired
     CommentRepo commentRepo;
 
-//    public boolean isCommentAllowedOnThisPost(Post twitterPost, User liker) {
-//        List<Like> likeList = commentRepo.findByTwitterPostAndLiker(twitterPost,liker);
-//        return likeList != null && likeList.isEmpty();
-//    }
-
     public Integer getCommentCountForPost(Post validPost) {
         return commentRepo.findByTwitterPost(validPost).size();
     }

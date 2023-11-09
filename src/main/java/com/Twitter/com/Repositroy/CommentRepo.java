@@ -11,6 +11,4 @@ import java.util.Collection;
 public interface CommentRepo extends JpaRepository<Comment,Integer> {
     Collection<Comment> findByTwitterPost(Post validPost);
 
-//
-//    List<Like> findByTwitterPostAndLiker(Post twitterPost, User liker);
 }

@@ -9,10 +9,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
-
     @Autowired
     private JavaMailSender javaMailSender;
-
     public void sendOtpEmail(String email, String otp)  {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
