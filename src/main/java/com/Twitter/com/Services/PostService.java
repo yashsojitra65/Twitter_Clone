@@ -4,6 +4,8 @@ import com.Twitter.com.Model.Post;
 import com.Twitter.com.Model.User;
 import com.Twitter.com.Repositroy.PostRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -30,6 +32,10 @@ public class PostService {
     }
     public Post getPostById(Integer postId) {
         return postRepo.findById(postId).orElse(null);
+    }
+
+    public Page<Post> getPostsByOwnerEmail(String email, Pageable pageable) {
+        return postRepo.findByPostOwnerUserEmail(email, pageable);
     }
 
 }

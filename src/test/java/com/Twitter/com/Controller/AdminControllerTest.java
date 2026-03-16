@@ -29,4 +29,13 @@ class AdminControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("Blue tick was set.."));
     }
+
+    @Test
+    void toggleBlueTickReturns404WhenUserMissing() throws Exception {
+        Mockito.when(adminService.toggleBlueTick(99L, true)).thenReturn("user doesn't exist");
+
+        mockMvc.perform(put("/admin/user/99/true"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("user doesn't exist"));
+    }
 }

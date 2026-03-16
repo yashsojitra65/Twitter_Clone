@@ -7,9 +7,25 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: yash2003
-      MYSQL_DATABASE: twitter_db
+      MYSQL_DATABASE: twitter
     ports:
       - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-hmysql", "-uroot", "-pyash2003"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: twitter-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
     networks:
       - app-network
 
@@ -18,14 +34,25 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/twitter_db
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/twitter
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: yash2003
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - app-network
+    restart: on-failure
 
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  mysql-data:

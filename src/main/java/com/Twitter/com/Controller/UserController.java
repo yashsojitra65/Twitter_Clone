@@ -8,6 +8,9 @@ import com.Twitter.com.Services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.NoSuchAlgorithmException;
@@ -68,8 +71,10 @@ public class UserController {
             description = "Retrieve and display all posts associated with the specified user's email.",
             tags = {"User Management"}
     )
-    public List<PostDto> showPost(@PathVariable String email) {
-        return userService.showPost(email);
+    public Page<PostDto> showPost(@PathVariable String email,
+                                  @RequestParam(defaultValue = "0") int page,
+                                  @RequestParam(defaultValue = "10") int size) {
+        return userService.showPost(email, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "time")));
     }
 
     @DeleteMapping("deletePost")

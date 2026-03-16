@@ -3,8 +3,8 @@ package com.Twitter.com.Controller;
 import com.Twitter.com.Model.Post;
 import com.Twitter.com.Model.dto.Credential;
 import com.Twitter.com.Model.dto.PostDto;
-import com.Twitter.com.Services.UserService;
 import com.Twitter.com.Services.FollowService;
+import com.Twitter.com.Services.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.security.NoSuchAlgorithmException;
@@ -86,17 +88,18 @@ class UserControllerTest {
     }
 
     @Test
-    void showPostReturnsList() throws Exception {
+    void showPostReturnsPagedList() throws Exception {
         List<PostDto> posts = Arrays.asList(
                 new PostDto("t1", "d1", "u1", "now", "alice"),
                 new PostDto("t2", "d2", "u2", "later", "bob")
         );
-        Mockito.when(userService.showPost("test@example.com")).thenReturn(posts);
+        Mockito.when(userService.showPost(Mockito.eq("test@example.com"), Mockito.any()))
+                .thenReturn(new PageImpl<>(posts, PageRequest.of(0, 10), posts.size()));
 
         mockMvc.perform(get("/User/showPost/test@example.com"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].title").value("t1"))
-                .andExpect(jsonPath("$[1].userName").value("bob"));
+                .andExpect(jsonPath("$.content[0].title").value("t1"))
+                .andExpect(jsonPath("$.content[1].userName").value("bob"));
     }
 
     @Test

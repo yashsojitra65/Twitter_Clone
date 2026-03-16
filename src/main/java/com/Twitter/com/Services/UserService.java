@@ -10,6 +10,8 @@ import com.Twitter.com.Services.utility.OTPGenerator;
 import com.Twitter.com.Services.utility.PasswordEncrypter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.security.NoSuchAlgorithmException;
@@ -246,9 +248,9 @@ public class UserService {
         return "Invalid or expired OTP";
     }
 
-    public List<PostDto> showPost(String email) {
-        List<Post> posts = postRepo.findByPostOwnerUserEmail(email);
-        return posts.stream().map(post -> new PostDto(post.getTitle(), post.getDescription(), post.getUrl(), post.getTime(), post.getPostOwner().getUserName())).collect(Collectors.toList());
+    public Page<PostDto> showPost(String email, Pageable pageable) {
+        Page<Post> posts = postService.getPostsByOwnerEmail(email, pageable);
+        return posts.map(post -> new PostDto(post.getTitle(), post.getDescription(), post.getUrl(), post.getTime(), post.getPostOwner().getUserName()));
     }
 
     public User getUserById(Long userId) {
