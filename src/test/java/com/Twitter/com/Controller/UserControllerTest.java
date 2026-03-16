@@ -45,7 +45,7 @@ class UserControllerTest {
     void signUpDelegatesToService() throws Exception {
         Mockito.when(userService.SignUp(any())).thenReturn("Register Successfully");
 
-        mockMvc.perform(post("/User/SignUp")
+        mockMvc.perform(post("/user/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"userEmail\":\"test@example.com\",\"userPassword\":\"pass\"}"))
                 .andExpect(status().isOk())
@@ -57,7 +57,7 @@ class UserControllerTest {
         Mockito.when(userService.SignIn(any(Credential.class))).thenReturn("login");
 
         Credential credential = new Credential("test@example.com", "pass");
-        mockMvc.perform(post("/User/SignIn")
+        mockMvc.perform(post("/user/signin")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(credential)))
                 .andExpect(status().isOk())
@@ -68,7 +68,7 @@ class UserControllerTest {
     void resetPasswordEndpoint() throws Exception {
         Mockito.when(userService.resetPassWord("test@example.com")).thenReturn("Otp sent Successfully");
 
-        mockMvc.perform(post("/User/resetPass")
+        mockMvc.perform(post("/user/resetpass")
                         .param("email", "test@example.com"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Otp sent Successfully"));
@@ -79,7 +79,7 @@ class UserControllerTest {
         Mockito.when(userService.verifyOTP("test@example.com", "123456", "newpass"))
                 .thenReturn("PassWord Successfully Save");
 
-        mockMvc.perform(put("/User/verifyOTP")
+        mockMvc.perform(put("/user/verifyOTP")
                         .param("email", "test@example.com")
                         .param("otp", "123456")
                         .param("newPassword", "newpass"))
@@ -96,7 +96,7 @@ class UserControllerTest {
         Mockito.when(userService.showPost(Mockito.eq("test@example.com"), Mockito.any()))
                 .thenReturn(new PageImpl<>(posts, PageRequest.of(0, 10), posts.size()));
 
-        mockMvc.perform(get("/User/showPost/test@example.com"))
+        mockMvc.perform(get("/user/showpost/test@example.com"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].title").value("t1"))
                 .andExpect(jsonPath("$.content[1].userName").value("bob"));
@@ -107,7 +107,7 @@ class UserControllerTest {
         Mockito.when(userService.CreatePost(any(Post.class), eq("test@example.com")))
                 .thenReturn("Post Upload Successfully");
 
-        mockMvc.perform(post("/User/Post")
+        mockMvc.perform(post("/user/post")
                         .param("email", "test@example.com")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"title\":\"Hello\"}"))
