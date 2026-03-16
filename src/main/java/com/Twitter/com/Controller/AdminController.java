@@ -3,15 +3,16 @@ package com.Twitter.com.Controller;
 import com.Twitter.com.Services.AdminService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("admin")
+@RequiredArgsConstructor
 @Tag(name = "Admin Management", description = "Manage administrative tasks and operations securely, including toggling the blue tick status for users.")
 public class AdminController {
-    @Autowired
-    AdminService adminService;
+
+    private final AdminService adminService;
 
     @PutMapping("user/{id}/{blueTick}")
     @Operation(

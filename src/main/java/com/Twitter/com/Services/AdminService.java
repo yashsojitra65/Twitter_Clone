@@ -1,16 +1,15 @@
 package com.Twitter.com.Services;
 
-import com.Twitter.com.Repositroy.AdminRepo;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class AdminService {
-    @Autowired
-    AdminRepo adminRepo;
-    @Autowired
-    UserService userService;
+
+    private final UserService userService;
+
     public String toggleBlueTick(Long id, boolean blueTick) {
-        return userService.toggleBlueTick(id,blueTick);
+        return userService.toggleBlueTick(id, blueTick);
     }
 }

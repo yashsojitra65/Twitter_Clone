@@ -3,19 +3,18 @@ package com.Twitter.com.Services;
 import com.Twitter.com.Model.Post;
 import com.Twitter.com.Model.User;
 import com.Twitter.com.Repositroy.PostRepo;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class PostService {
 
-    @Autowired
-    PostRepo postRepo;
+    private final PostRepo postRepo;
 
     public Post CreatePost(Post post) {
         return postRepo.save(post);
     }
-
 
     public String deletePost(Integer postId, User user) {
         Post post = postRepo.findById(postId).orElse(null);
@@ -32,6 +31,5 @@ public class PostService {
     public Post getPostById(Integer postId) {
         return postRepo.findById(postId).orElse(null);
     }
-
 
 }

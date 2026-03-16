@@ -2,22 +2,30 @@ package com.Twitter.com.Services;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class EmailService {
-    @Autowired
-    private JavaMailSender javaMailSender;
-    public void sendOtpEmail(String email, String otp)  {
+    private final JavaMailSender javaMailSender;
+
+    @Value("${spring.mail.username}")
+    private String fromEmail;
+
+    public void sendOtpEmail(String email, String otp) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
             // Set the email recipient
             helper.setTo(email);
+
+            // Set sender to authenticated account to satisfy SMTP providers
+            helper.setFrom(fromEmail);
 
             // Set the email subject
             helper.setSubject("OTP Verification");
@@ -46,7 +54,6 @@ public class EmailService {
             javaMailSender.send(message);
         } catch (MessagingException e) {
             e.printStackTrace();
-            // Handle the exception
         }
     }
 }

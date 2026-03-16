@@ -9,7 +9,8 @@ import org.springframework.stereotype.Repository;
 import java.util.*;
 
 @Repository
-public interface LikeRepo extends JpaRepository<Like,Integer> {
+public interface LikeRepo extends JpaRepository<Like, Integer> {
     List<Like> findByTwitterPostAndLiker(Post twitterPost, User liker);
+
     Collection<Like> findByTwitterPost(Post validPost);
 }

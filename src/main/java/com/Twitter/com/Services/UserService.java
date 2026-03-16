@@ -8,6 +8,7 @@ import com.Twitter.com.Repositroy.PostRepo;
 import com.Twitter.com.Repositroy.UserRepo;
 import com.Twitter.com.Services.utility.OTPGenerator;
 import com.Twitter.com.Services.utility.PasswordEncrypter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,30 +17,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
-    @Autowired
-    UserRepo userRepo;
 
-    @Autowired
-    PostService postService;
-
-    @Autowired
-    LikeService likeService;
-
-    @Autowired
-    FollowService followService;
-
-    @Autowired
-    CommentService commentService;
-
-    @Autowired
-    EmailService emailService;
-
-    @Autowired
-    PostRepo postRepo;
-
-    @Autowired
-    AdminRepo adminRepo;
+    private final UserRepo userRepo;
+    private final PostService postService;
+    private final LikeService likeService;
+    private final FollowService followService;
+    private final CommentService commentService;
+    private final EmailService emailService;
+    private final PostRepo postRepo;
+    private final AdminRepo adminRepo;
+    private final OtpService otpService;
 
     public String SignUp(User user) throws NoSuchAlgorithmException {
 
@@ -238,23 +227,23 @@ public class UserService {
         if (!userRepo.existsByuserEmail(email)) {
             return "Register First";
         }
-        User user = userRepo.findByUserEmail(email);
-        user.setOtp(OTPGenerator.generateOTP());
-        userRepo.save(user);
-        emailService.sendOtpEmail(email, user.getOtp());
+//        User user = userRepo.findByUserEmail(email);
+        String otp = OTPGenerator.generateOTP();
+        otpService.storeOtp(email, otp);
+        emailService.sendOtpEmail(email, otp);
         return "Otp sent Successfully";
     }
 
     public String verifyOTP(String email, String otp, String newPassword) throws NoSuchAlgorithmException {
         User user = userRepo.findByUserEmail(email);
-        if (user.getOtp().equals(otp)) {
+        if (otpService.validateOtp(email, otp)) {
             String newHashPassWord = PasswordEncrypter.hashPasswordWithStaticSecret(newPassword);
             user.setUserPassword(newHashPassWord);
             user.setStatus("logOut");
             userRepo.save(user);
             return "PassWord Successfully Save";
         }
-        return "Invalid OTP";
+        return "Invalid or expired OTP";
     }
 
     public List<PostDto> showPost(String email) {

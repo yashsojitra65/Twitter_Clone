@@ -18,6 +18,7 @@ public class Post {
     public String url;
 
     public String time;
+
     @PrePersist
     private void prePersist() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // Define your desired date/time format

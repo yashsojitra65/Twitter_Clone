@@ -39,6 +39,7 @@ public class User {
     private String status;
 
     private int total=0;
+    @Transient
     private String otp;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)

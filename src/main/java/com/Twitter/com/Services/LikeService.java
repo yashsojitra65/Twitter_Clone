@@ -4,17 +4,19 @@ import com.Twitter.com.Model.Like;
 import com.Twitter.com.Model.Post;
 import com.Twitter.com.Model.User;
 import com.Twitter.com.Repositroy.LikeRepo;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class LikeService {
-    @Autowired
-    LikeRepo likeRepo;
+
+    private final LikeRepo likeRepo;
+
     public boolean isLikeAllowedOnThisPost(Post twitterPost, User liker) {
-        List<Like> likeList = likeRepo.findByTwitterPostAndLiker(twitterPost,liker);
+        List<Like> likeList = likeRepo.findByTwitterPostAndLiker(twitterPost, liker);
         return likeList != null && likeList.isEmpty();
     }
 
@@ -22,6 +24,7 @@ public class LikeService {
         likeRepo.save(like);
         return "Twitter post liked successfully!!!";
     }
+
     public Integer getLikeCountForPost(Post validPost) {
         return likeRepo.findByTwitterPost(validPost).size();
     }
@@ -33,6 +36,5 @@ public class LikeService {
     public void removeLike(Like like) {
         likeRepo.delete(like);
     }
-
 
 }

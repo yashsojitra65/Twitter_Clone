@@ -15,7 +15,7 @@ public class Follow {
     private Integer followId;
 
     @ManyToOne
-    @JoinColumn(name="fk_user")
+    @JoinColumn(name = "fk_user")
     User currentUser;
 
     @ManyToOne

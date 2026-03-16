@@ -5,22 +5,22 @@ import com.Twitter.com.Model.Follow;
 import com.Twitter.com.Repositroy.FollowRepo;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class FollowService {
 
-    @Autowired
-    FollowRepo followRepo;
+    private final FollowRepo followRepo;
 
     @PersistenceContext
     private EntityManager entityManager;
 
     public boolean isFollowAllowed(User followTargetUser, User follower) {
-        List<Follow> followList = followRepo.findByCurrentUserAndUserFollower(followTargetUser,follower);
+        List<Follow> followList = followRepo.findByCurrentUserAndUserFollower(followTargetUser, follower);
 
         return followList != null && followList.isEmpty() && !followTargetUser.equals(follower);
     }

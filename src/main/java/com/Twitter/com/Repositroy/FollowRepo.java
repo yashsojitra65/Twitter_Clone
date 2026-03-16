@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface FollowRepo extends JpaRepository<Follow,Integer> {
+public interface FollowRepo extends JpaRepository<Follow, Integer> {
     List<Follow> findByCurrentUserAndUserFollower(User followTargetUser, User follower);
 }

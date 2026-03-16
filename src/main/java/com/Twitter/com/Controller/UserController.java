@@ -7,7 +7,7 @@ import com.Twitter.com.Services.FollowService;
 import com.Twitter.com.Services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.NoSuchAlgorithmException;
@@ -15,13 +15,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("User")
+@RequiredArgsConstructor
 @Tag(name = "User Management", description = "Manage user accounts securely, including user registration, login, logout, password reset, and account verification. Simplify user-related operations with this API.")
 public class UserController {
-    @Autowired
-    UserService userService;
 
-    @Autowired
-    FollowService followService;
+    private final UserService userService;
+    private final FollowService followService;
 
     @PostMapping("/SignUp")
     @Operation(
@@ -33,8 +32,6 @@ public class UserController {
         return userService.SignUp(user);
     }
 
-
-
     @PostMapping("/SignIn")
     @Operation(
             summary = "User Sign In",
@@ -44,9 +41,6 @@ public class UserController {
     private String SignIn(@RequestBody Credential credential) throws NoSuchAlgorithmException {
         return userService.SignIn(credential);
     }
-
-
-
 
     @GetMapping("SignOut")
     @Operation(
@@ -58,8 +52,6 @@ public class UserController {
         return userService.SignOut(email);
     }
 
-
-
     @PostMapping("Post")
     @Operation(
             summary = "Create a Post",
@@ -70,7 +62,6 @@ public class UserController {
         return userService.CreatePost(post, email);
     }
 
-
     @GetMapping("/showPost/{email}")
     @Operation(
             summary = "Show User Posts",
@@ -80,7 +71,6 @@ public class UserController {
     public List<PostDto> showPost(@PathVariable String email) {
         return userService.showPost(email);
     }
-
 
     @DeleteMapping("deletePost")
     @Operation(
@@ -102,8 +92,6 @@ public class UserController {
         return userService.addLike(like, likeEmail);
     }
 
-
-
     @GetMapping("totalLike/{postId}")
     @Operation(
             summary = "Get Total Likes",
@@ -114,8 +102,6 @@ public class UserController {
         return userService.totalLike(postId);
     }
 
-
-
     @GetMapping("totalComment/{postId}")
     @Operation(
             summary = "Get Total Comments",
@@ -125,9 +111,6 @@ public class UserController {
     public String totalComment(@PathVariable Integer postId) {
         return userService.totalComment(postId);
     }
-
-
-
 
     @GetMapping("totalFollow/{userId}")
     @Operation(
@@ -140,8 +123,6 @@ public class UserController {
         return followService.getTotalFollow(user);
     }
 
-
-
     @DeleteMapping("DeleteLike")
     @Operation(
             summary = "Delete Like",
@@ -151,8 +132,6 @@ public class UserController {
     public String deleteLike(@RequestParam Integer likeId, @RequestParam String email) {
         return userService.deleteLike(likeId, email);
     }
-
-
 
     @PostMapping("follow")
     @Operation(
@@ -184,7 +163,6 @@ public class UserController {
         return userService.addComment(comment, commenterEmail);
     }
 
-
     @DeleteMapping("removeComment")
     @Operation(
             summary = "Remove Comment",
@@ -201,7 +179,7 @@ public class UserController {
             description = "Allow users to reset their password on the Twitter clone platform.",
             tags = {"User Management"}
     )
-    public String resetPassWord(@RequestParam String email){
+    public String resetPassWord(@RequestParam String email) {
         return userService.resetPassWord(email);
     }
 
@@ -211,9 +189,9 @@ public class UserController {
             description = "Verify the OTP (One-Time Password) sent to the user's email during the password reset process on the Twitter clone platform.",
             tags = {"User Management"}
     )
-    public String verifyOTP(@RequestParam String email,String otp,String newPassword) throws NoSuchAlgorithmException {
+    public String verifyOTP(@RequestParam String email, String otp, String newPassword) throws NoSuchAlgorithmException {
 
-        return userService.verifyOTP(email,otp,newPassword);
+        return userService.verifyOTP(email, otp, newPassword);
     }
 
 }

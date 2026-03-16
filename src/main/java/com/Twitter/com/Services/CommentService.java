@@ -3,13 +3,14 @@ package com.Twitter.com.Services;
 import com.Twitter.com.Model.Comment;
 import com.Twitter.com.Model.Post;
 import com.Twitter.com.Repositroy.CommentRepo;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class CommentService {
-    @Autowired
-    CommentRepo commentRepo;
+
+    private final CommentRepo commentRepo;
 
     public Integer getCommentCountForPost(Post validPost) {
         return commentRepo.findByTwitterPost(validPost).size();
@@ -22,7 +23,7 @@ public class CommentService {
     }
 
     public Comment findComment(Integer commentId) {
-        return  commentRepo.findById(commentId).orElse(null);
+        return commentRepo.findById(commentId).orElse(null);
     }
 
     public void removeComment(Comment comment) {
