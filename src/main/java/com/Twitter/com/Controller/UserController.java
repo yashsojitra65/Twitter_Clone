@@ -45,7 +45,7 @@ public class UserController {
         return userService.SignIn(credential);
     }
 
-    @GetMapping("SignOut")
+    @GetMapping("/SignOut")
     @Operation(
             summary = "User Sign Out",
             description = "Allow users to sign out securely from the Twitter clone platform.",
@@ -55,7 +55,7 @@ public class UserController {
         return userService.SignOut(email);
     }
 
-    @PostMapping("Post")
+    @PostMapping("/Post")
     @Operation(
             summary = "Create a Post",
             description = "Allow users to create a new post on the Twitter clone platform.",
@@ -77,7 +77,7 @@ public class UserController {
         return userService.showPost(email, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "time")));
     }
 
-    @DeleteMapping("deletePost")
+    @DeleteMapping("/deletePost")
     @Operation(
             summary = "Delete a Post",
             description = "Delete a specific post using the post ID and associated user's email.",
@@ -87,7 +87,7 @@ public class UserController {
         return userService.deletePost(postId, email);
     }
 
-    @PostMapping("like")
+    @PostMapping("/like")
     @Operation(
             summary = "Add Like",
             description = "Allow users to add a like to a post using the user's email.",
@@ -97,7 +97,7 @@ public class UserController {
         return userService.addLike(like, likeEmail);
     }
 
-    @GetMapping("totalLike/{postId}")
+    @GetMapping("/totalLike/{postId}")
     @Operation(
             summary = "Get Total Likes",
             description = "Retrieve the total number of likes for a specific post using the post ID.",
@@ -107,7 +107,7 @@ public class UserController {
         return userService.totalLike(postId);
     }
 
-    @GetMapping("totalComment/{postId}")
+    @GetMapping("/totalComment/{postId}")
     @Operation(
             summary = "Get Total Comments",
             description = "Retrieve the total number of comments for a specific post using the post ID.",
@@ -117,7 +117,7 @@ public class UserController {
         return userService.totalComment(postId);
     }
 
-    @GetMapping("totalFollow/{userId}")
+    @GetMapping("/totalFollow/{userId}")
     @Operation(
             summary = "Get Total Followers",
             description = "Retrieve the total number of followers for a specific user using the user ID.",
@@ -128,7 +128,7 @@ public class UserController {
         return followService.getTotalFollow(user);
     }
 
-    @DeleteMapping("DeleteLike")
+    @DeleteMapping("/DeleteLike")
     @Operation(
             summary = "Delete Like",
             description = "Remove a specific like using the like ID and associated user's email.",
@@ -138,7 +138,7 @@ public class UserController {
         return userService.deleteLike(likeId, email);
     }
 
-    @PostMapping("follow")
+    @PostMapping("/follow")
     @Operation(
             summary = "Follow User",
             description = "Allow a user to follow another user on the Twitter clone platform.",
@@ -148,7 +148,7 @@ public class UserController {
         return userService.FollowUser(follow, followerEmail);
     }
 
-    @DeleteMapping("unfollow/{followId}")
+    @DeleteMapping("/unfollow/{followId}")
     @Operation(
             summary = "Unfollow User",
             description = "Allow a user to unfollow another user on the Twitter clone platform.",
@@ -158,7 +158,7 @@ public class UserController {
         return userService.unFollowUser(followId, followerEmail);
     }
 
-    @PostMapping("comment")
+    @PostMapping("/comment")
     @Operation(
             summary = "Add Comment",
             description = "Allow users to add comments to a post on the Twitter clone platform.",
@@ -168,7 +168,7 @@ public class UserController {
         return userService.addComment(comment, commenterEmail);
     }
 
-    @DeleteMapping("removeComment")
+    @DeleteMapping("/removeComment")
     @Operation(
             summary = "Remove Comment",
             description = "Allow users to remove their comments from a post on the Twitter clone platform.",
@@ -188,7 +188,7 @@ public class UserController {
         return userService.resetPassWord(email);
     }
 
-    @PutMapping("verifyOTP")
+    @PutMapping("/verifyOTP")
     @Operation(
             summary = "Verify OTP",
             description = "Verify the OTP (One-Time Password) sent to the user's email during the password reset process on the Twitter clone platform.",

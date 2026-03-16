@@ -16,7 +16,7 @@ public class AdminController {
 
     private final AdminService adminService;
 
-    @PutMapping("user/{id}/{blueTick}")
+    @PutMapping("/user/{id}/{blueTick}")
     @Operation(
             summary = "Toggle Blue Tick Status",
             description = "Toggle the blue tick status for a specific user by providing the user ID and the new blue tick status.",
