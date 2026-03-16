@@ -17,7 +17,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 @RestController
-@RequestMapping("User")
+@RequestMapping("user")
 @RequiredArgsConstructor
 @Tag(name = "User Management", description = "Manage user accounts securely, including user registration, login, logout, password reset, and account verification. Simplify user-related operations with this API.")
 public class UserController {
