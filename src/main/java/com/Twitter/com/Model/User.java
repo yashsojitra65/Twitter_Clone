@@ -39,10 +39,24 @@ public class User {
     private String status;
 
     @Column(name = "total_post")
-    private int total=0;
+    private Integer total = 0;
     @Transient
     private String otp;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String isBlueTicked;
+
+    @PrePersist
+    private void prePersist() {
+        if (total == null) {
+            total = 0;
+        }
+    }
+
+    @PostLoad
+    private void postLoad() {
+        if (total == null) {
+            total = 0;
+        }
+    }
 }

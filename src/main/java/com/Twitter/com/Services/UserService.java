@@ -4,6 +4,7 @@ import com.Twitter.com.Model.*;
 import com.Twitter.com.Model.Enum.PostType;
 import com.Twitter.com.Model.dto.CreatePostRequest;
 import com.Twitter.com.Model.dto.Credential;
+import com.Twitter.com.Model.dto.LikeRequest;
 import com.Twitter.com.Model.dto.PostDto;
 import com.Twitter.com.Repositroy.AdminRepo;
 import com.Twitter.com.Repositroy.PostRepo;
@@ -80,6 +81,10 @@ public class UserService {
             return "Please signIn first";
         }
 
+        if (user.getTotal() == null) {
+            user.setTotal(0);
+        }
+
         Post post = new Post();
         post.setTitle(createRequest.getTitle());
         post.setDescription(createRequest.getDescription());
@@ -104,20 +109,24 @@ public class UserService {
     }
 
 
-    public String addLike(Like like, String likeEmail) {
-        Post twitterPost = like.getTwitterPost();
-        boolean postValid = postService.validatePost(twitterPost);
+    public String addLike(LikeRequest likeRequest, String likeEmail) {
+        User liker = userRepo.findByUserEmail(likeEmail);
+        if (liker == null || !"login".equalsIgnoreCase(liker.getStatus())) {
+            return "Please signIn first";
+        }
 
-        if (postValid) {
-            User liker = userRepo.findByUserEmail(likeEmail);
-            if (likeService.isLikeAllowedOnThisPost(twitterPost, liker)) {
-                like.setLiker(liker);
-                return likeService.addLike(like);
-            } else {
-                return "Already Liked!!";
-            }
-        } else {
+        Post twitterPost = postService.getPostById(likeRequest.getPostId());
+        if (twitterPost == null || !postService.validatePost(twitterPost)) {
             return "Cannot like on Invalid Post!!";
+        }
+
+        if (likeService.isLikeAllowedOnThisPost(twitterPost, liker)) {
+            Like like = new Like();
+            like.setTwitterPost(twitterPost);
+            like.setLiker(liker);
+            return likeService.addLike(like);
+        } else {
+            return "Already Liked!!";
         }
     }
 

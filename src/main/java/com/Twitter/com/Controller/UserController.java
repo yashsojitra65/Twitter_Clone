@@ -4,6 +4,7 @@ import com.Twitter.com.Model.*;
 import com.Twitter.com.Model.Enum.PostType;
 import com.Twitter.com.Model.dto.CreatePostRequest;
 import com.Twitter.com.Model.dto.Credential;
+import com.Twitter.com.Model.dto.LikeRequest;
 import com.Twitter.com.Model.dto.PostDto;
 import com.Twitter.com.Services.FollowService;
 import com.Twitter.com.Services.UserService;
@@ -107,7 +108,7 @@ public class UserController {
             description = "Allow users to add a like to a post using the user's email.",
             tags = {"User Management"}
     )
-    private String addLike(@RequestBody Like like, @RequestParam String likeEmail) {
+    private String addLike(@RequestBody LikeRequest like, @RequestParam String likeEmail) {
         return userService.addLike(like, likeEmail);
     }
 
