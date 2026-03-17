@@ -3,6 +3,7 @@ package com.Twitter.com.Controller;
 import com.Twitter.com.Model.*;
 import com.Twitter.com.Model.Enum.PostType;
 import com.Twitter.com.Model.dto.CreatePostRequest;
+import com.Twitter.com.Model.dto.CommentRequest;
 import com.Twitter.com.Model.dto.Credential;
 import com.Twitter.com.Model.dto.FollowRequest;
 import com.Twitter.com.Model.dto.LikeRequest;
@@ -180,7 +181,7 @@ public class UserController {
             description = "Allow users to add comments to a post on the Twitter clone platform.",
             tags = {"User Management"}
     )
-    public String addComment(@RequestBody Comment comment, @RequestParam String commenterEmail) {
+    public String addComment(@RequestBody CommentRequest comment, @RequestParam String commenterEmail) {
         return userService.addComment(comment, commenterEmail);
     }
 

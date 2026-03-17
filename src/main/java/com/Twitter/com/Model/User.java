@@ -36,10 +36,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     private AccountType accountType;
 
-    private String status;
-
     @Column(name = "total_post")
-    private Integer total = 0;
+    private Integer totalPost = 0;
     @Transient
     private String otp;
 
@@ -48,15 +46,15 @@ public class User {
 
     @PrePersist
     private void prePersist() {
-        if (total == null) {
-            total = 0;
+        if (totalPost == null) {
+            totalPost = 0;
         }
     }
 
     @PostLoad
     private void postLoad() {
-        if (total == null) {
-            total = 0;
+        if (totalPost == null) {
+            totalPost = 0;
         }
     }
 }

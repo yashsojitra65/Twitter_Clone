@@ -25,7 +25,7 @@ public class Comment {
     private Post twitterPost;
 
     @ManyToOne
-    @JoinColumn(name = "fk_commenter_id")
+    @JoinColumn(name = "fk_commenter_user_id")
     private User commenter;
 
     public String time;

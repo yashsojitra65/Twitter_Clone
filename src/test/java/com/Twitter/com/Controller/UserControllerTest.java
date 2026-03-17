@@ -1,6 +1,7 @@
 package com.Twitter.com.Controller;
 
 import com.Twitter.com.Model.Enum.PostType;
+import com.Twitter.com.Model.dto.CommentRequest;
 import com.Twitter.com.Model.dto.FollowRequest;
 import com.Twitter.com.Model.dto.CreatePostRequest;
 import com.Twitter.com.Model.dto.Credential;
@@ -132,5 +133,18 @@ class UserControllerTest {
                         .content("{\"targetUserId\":2}"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("ok"));
+    }
+
+    @Test
+    void commentDelegates() throws Exception {
+        Mockito.when(userService.addComment(any(CommentRequest.class), eq("user@example.com")))
+                .thenReturn("comment added");
+
+        mockMvc.perform(post("/user/comment")
+                        .param("commenterEmail", "user@example.com")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"postId\":1,\"text\":\"Nice\"}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("comment added"));
     }
 }
