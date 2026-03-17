@@ -14,14 +14,11 @@ import com.Twitter.com.Repositroy.UserRepo;
 import com.Twitter.com.Services.utility.OTPGenerator;
 import com.Twitter.com.Services.utility.PasswordEncrypter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +33,7 @@ public class UserService {
     private final PostRepo postRepo;
     private final AdminRepo adminRepo;
     private final OtpService otpService;
+    private final LoginStatusService loginStatusService;
 
     public String SignUp(User user) throws NoSuchAlgorithmException {
 
@@ -58,19 +56,16 @@ public class UserService {
         User user = userRepo.findByUserEmail(credential.getEmail());
 
         if (hashPass.equals(user.getUserPassword())) {
-            user.setStatus("login");
-            userRepo.save(user);
+            loginStatusService.markLogin(user.getUserEmail());
             return "login";
-        } else {
-            return "Credential MisMatch";
         }
+        return "Credential MisMatch";
     }
 
     public String SignOut(String email) {
         User user = userRepo.findByUserEmail(email);
-        if (user.getStatus().equals("login")) {
-            user.setStatus("logout");
-            userRepo.save(user);
+        if (isLoggedIn(user)) {
+            loginStatusService.markLogout(email);
         } else {
             return "Please signIn first";
         }
@@ -79,12 +74,12 @@ public class UserService {
 
     public String CreatePost(CreatePostRequest createRequest, String email) {
         User user = userRepo.findByUserEmail(email);
-        if (user == null || !"login".equalsIgnoreCase(user.getStatus())) {
+        if (!isLoggedIn(user)) {
             return "Please signIn first";
         }
 
-        if (user.getTotal() == null) {
-            user.setTotal(0);
+        if (user.getTotalPost() == null) {
+            user.setTotalPost(0);
         }
 
         Post post = new Post();
@@ -94,26 +89,28 @@ public class UserService {
         post.setPostType(createRequest.getPostType());
         post.setPostOwner(user);
 
-        user.setTotal(user.getTotal() + 1);
+        user.setTotalPost(user.getTotalPost() + 1);
         postService.CreatePost(post);
         return "Post Upload Successfully";
     }
 
     public String deletePost(Integer postId, String email) {
         User user = userRepo.findByUserEmail(email);
-        if (user.getStatus().equals("login") && user.getTotal() > 0) {
-            user.setTotal(user.getTotal() - 1);
-            postService.deletePost(postId, user);
-        } else {
+        if (!isLoggedIn(user)) {
             return "Please signIn first";
         }
+        if (user.getTotalPost() == null || user.getTotalPost() <= 0) {
+            return "No posts to delete";
+        }
+        user.setTotalPost(user.getTotalPost() - 1);
+        postService.deletePost(postId, user);
         return "Post Deleted Successfully";
     }
 
 
     public String addLike(LikeRequest likeRequest, String likeEmail) {
         User liker = userRepo.findByUserEmail(likeEmail);
-        if (liker == null || !"login".equalsIgnoreCase(liker.getStatus())) {
+        if (!isLoggedIn(liker)) {
             return "Please signIn first";
         }
 
@@ -174,7 +171,7 @@ public class UserService {
 
     public String FollowUser(FollowRequest followRequest, String followerEmail) {
         User follower = userRepo.findByUserEmail(followerEmail);
-        if (follower == null || !"login".equalsIgnoreCase(follower.getStatus())) {
+        if (!isLoggedIn(follower)) {
             return "Please signIn first";
         }
 
@@ -216,7 +213,7 @@ public class UserService {
 
     public String addComment(CommentRequest commentRequest, String commenterEmail) {
         User commenter = userRepo.findByUserEmail(commenterEmail);
-        if (commenter == null || !"login".equalsIgnoreCase(commenter.getStatus())) {
+        if (!isLoggedIn(commenter)) {
             return "Please signIn first";
         }
 
@@ -256,6 +253,13 @@ public class UserService {
         return postOwnerEmail.equals(email) || commentOwnerEmail.equals(email);
     }
 
+    private boolean isLoggedIn(User user) {
+        if (user == null) {
+            return false;
+        }
+        return loginStatusService.isLoggedIn(user.getUserEmail());
+    }
+
     public String resetPassWord(String email) {
         if (!userRepo.existsByuserEmail(email)) {
             return "Register First";
@@ -272,9 +276,9 @@ public class UserService {
         if (otpService.validateOtp(email, otp)) {
             String newHashPassWord = PasswordEncrypter.hashPasswordWithStaticSecret(newPassword);
             user.setUserPassword(newHashPassWord);
-            user.setStatus("logOut");
             userRepo.save(user);
-            return "PassWord Successfully Save";
+            loginStatusService.markLogout(email);
+            return "Password Successfully Save";
         }
         return "Invalid or expired OTP";
     }

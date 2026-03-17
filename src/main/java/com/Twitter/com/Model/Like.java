@@ -16,7 +16,7 @@ public class Like {
     private Post twitterPost;
 
     @ManyToOne
-    @JoinColumn(name = "fk_like_id")
+    @JoinColumn(name = "fk_like_user_id")
     private User liker;
 
 }

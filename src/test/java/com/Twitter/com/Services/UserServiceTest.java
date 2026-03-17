@@ -45,6 +45,8 @@ class UserServiceTest {
     AdminRepo adminRepo;
     @Mock
     OtpService otpService;
+    @Mock
+    LoginStatusService loginStatusService;
 
     @InjectMocks
     UserService userService;
@@ -86,12 +88,12 @@ class UserServiceTest {
         user.setUserPassword(PasswordEncrypter.hashPasswordWithStaticSecret("plain"));
         when(userRepo.existsByuserEmail("test@example.com")).thenReturn(true);
         when(userRepo.findByUserEmail("test@example.com")).thenReturn(user);
+        when(loginStatusService.isLoggedIn("test@example.com")).thenReturn(false);
 
         String result = userService.SignIn(credential);
 
         assertEquals("login", result);
-        assertEquals("login", user.getStatus());
-        verify(userRepo).save(user);
+        verify(loginStatusService).markLogin("test@example.com");
     }
 
     @Test
@@ -136,9 +138,9 @@ class UserServiceTest {
         String result = userService.verifyOTP(email, "123456", "newpass");
 
         assertEquals("PassWord Successfully Save", result);
-        assertEquals("logOut", user.getStatus());
         assertEquals(PasswordEncrypter.hashPasswordWithStaticSecret("newpass"), user.getUserPassword());
         verify(userRepo).save(user);
+        verify(loginStatusService).markLogout(email);
     }
 
     @Test
@@ -159,8 +161,11 @@ class UserServiceTest {
     void createPostRejectsWhenUserNotLoggedIn() {
         String email = "test@example.com";
         User user = new User();
-        user.setStatus("logout");
         when(userRepo.findByUserEmail(email)).thenReturn(user);
+        when(loginStatusService.isLoggedIn(email)).thenReturn(false);
+
+
+
 
         CreatePostRequest req = new CreatePostRequest();
         req.setTitle("title");
@@ -169,15 +174,17 @@ class UserServiceTest {
 
         assertEquals("Please signIn first", result);
         verify(postService, never()).CreatePost(any(Post.class));
-        assertEquals(0, user.getTotal());
+        assertEquals(0, user.getTotalPost());
     }
 
     @Test
     void createPostSetsOwnerAndIncrementsTotal() {
         String email = "test@example.com";
         User user = new User();
-        user.setStatus("login");
         when(userRepo.findByUserEmail(email)).thenReturn(user);
+        when(loginStatusService.isLoggedIn(email)).thenReturn(true);
+
+
 
         CreatePostRequest req = new CreatePostRequest();
         req.setTitle("title");
@@ -198,15 +205,15 @@ class UserServiceTest {
         assertEquals("desc", saved.getDescription());
         assertEquals("http://u", saved.getUrl());
         assertEquals(PostType.IMAGE, saved.getPostType());
-        assertEquals(1, user.getTotal());
+        assertEquals(1, user.getTotalPost());
     }
 
     @Test
     void addLikeFailsWhenNotLoggedIn() {
         String email = "test@example.com";
         User user = new User();
-        user.setStatus("logout");
         when(userRepo.findByUserEmail(email)).thenReturn(user);
+        when(loginStatusService.isLoggedIn(email)).thenReturn(false);
 
         LikeRequest likeRequest = new LikeRequest();
         likeRequest.setPostId(1);
@@ -221,8 +228,8 @@ class UserServiceTest {
     void addLikeSucceedsAndCreatesLike() {
         String email = "test@example.com";
         User user = new User();
-        user.setStatus("login");
         when(userRepo.findByUserEmail(email)).thenReturn(user);
+        when(loginStatusService.isLoggedIn(email)).thenReturn(true);
 
         Post post = new Post();
         post.setPostId(1);
@@ -244,8 +251,9 @@ class UserServiceTest {
     void followUserFailsWhenNotLoggedIn() {
         String email = "follower@example.com";
         User follower = new User();
-        follower.setStatus("logout");
         when(userRepo.findByUserEmail(email)).thenReturn(follower);
+        when(loginStatusService.isLoggedIn(email)).thenReturn(false);
+
 
         FollowRequest req = new FollowRequest();
         req.setTargetUserId(2L);
@@ -260,9 +268,10 @@ class UserServiceTest {
     void followUserFailsWhenTargetMissing() {
         String email = "follower@example.com";
         User follower = new User();
-        follower.setStatus("login");
         when(userRepo.findByUserEmail(email)).thenReturn(follower);
         when(userRepo.findById(99L)).thenReturn(java.util.Optional.empty());
+        when(loginStatusService.isLoggedIn(email)).thenReturn(true);
+
 
         FollowRequest req = new FollowRequest();
         req.setTargetUserId(99L);
@@ -277,7 +286,6 @@ class UserServiceTest {
     void followUserSucceeds() {
         String email = "follower@example.com";
         User follower = new User();
-        follower.setStatus("login");
         follower.setGetUserHandle("@me");
         User target = new User();
         target.setUserid(2L);
@@ -286,6 +294,8 @@ class UserServiceTest {
         when(userRepo.findByUserEmail(email)).thenReturn(follower);
         when(userRepo.findById(2L)).thenReturn(java.util.Optional.of(target));
         when(followService.isFollowAllowed(target, follower)).thenReturn(true);
+        when(loginStatusService.isLoggedIn(email)).thenReturn(true);
+
 
         FollowRequest req = new FollowRequest();
         req.setTargetUserId(2L);
@@ -300,8 +310,8 @@ class UserServiceTest {
     void addCommentFailsWhenNotLoggedIn() {
         String email = "user@example.com";
         User user = new User();
-        user.setStatus("logout");
         when(userRepo.findByUserEmail(email)).thenReturn(user);
+        when(loginStatusService.isLoggedIn(email)).thenReturn(false);
 
         CommentRequest req = new CommentRequest();
         req.setPostId(1);
@@ -317,9 +327,10 @@ class UserServiceTest {
     void addCommentFailsWhenPostInvalid() {
         String email = "user@example.com";
         User user = new User();
-        user.setStatus("login");
         when(userRepo.findByUserEmail(email)).thenReturn(user);
         when(postService.getPostById(1)).thenReturn(null);
+        when(loginStatusService.isLoggedIn(email)).thenReturn(true);
+
 
         CommentRequest req = new CommentRequest();
         req.setPostId(1);
@@ -335,7 +346,6 @@ class UserServiceTest {
     void addCommentSucceeds() {
         String email = "user@example.com";
         User user = new User();
-        user.setStatus("login");
         when(userRepo.findByUserEmail(email)).thenReturn(user);
 
         Post post = new Post();
@@ -343,6 +353,8 @@ class UserServiceTest {
         when(postService.getPostById(1)).thenReturn(post);
         when(postService.validatePost(post)).thenReturn(true);
         when(commentService.addComment(any())).thenReturn("ok");
+        when(loginStatusService.isLoggedIn(email)).thenReturn(true);
+
 
         CommentRequest req = new CommentRequest();
         req.setPostId(1);
