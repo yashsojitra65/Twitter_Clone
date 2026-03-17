@@ -4,6 +4,7 @@ import com.Twitter.com.Model.*;
 import com.Twitter.com.Model.Enum.PostType;
 import com.Twitter.com.Model.dto.CreatePostRequest;
 import com.Twitter.com.Model.dto.Credential;
+import com.Twitter.com.Model.dto.FollowRequest;
 import com.Twitter.com.Model.dto.LikeRequest;
 import com.Twitter.com.Model.dto.PostDto;
 import com.Twitter.com.Repositroy.AdminRepo;
@@ -170,19 +171,24 @@ public class UserService {
         return likerEmail.equals(likeOwnerEmail);
     }
 
-    public String FollowUser(Follow follow, String followerEmail) {
-        User followTargetUser = userRepo.findById(follow.getCurrentUser().getUserid()).orElse(null);
+    public String FollowUser(FollowRequest followRequest, String followerEmail) {
         User follower = userRepo.findByUserEmail(followerEmail);
+        if (follower == null || !"login".equalsIgnoreCase(follower.getStatus())) {
+            return "Please signIn first";
+        }
 
-        if (followTargetUser != null) {
-            if (followService.isFollowAllowed(followTargetUser, follower)) {
-                followService.startFollowing(follow, follower);
-                return follower.getGetUserHandle() + " is now following " + followTargetUser.getGetUserHandle();
-            } else {
-                return follower.getUserHandle + " already follows " + followTargetUser.getUserHandle;
-            }
-        } else {
+        User followTargetUser = userRepo.findById(followRequest.getTargetUserId()).orElse(null);
+        if (followTargetUser == null) {
             return "User to be followed is Invalid!!!";
+        }
+
+        if (followService.isFollowAllowed(followTargetUser, follower)) {
+            Follow follow = new Follow();
+            follow.setCurrentUser(followTargetUser);
+            followService.startFollowing(follow, follower);
+            return follower.getGetUserHandle() + " is now following " + followTargetUser.getGetUserHandle();
+        } else {
+            return follower.getUserHandle + " already follows " + followTargetUser.getUserHandle;
         }
     }
 
