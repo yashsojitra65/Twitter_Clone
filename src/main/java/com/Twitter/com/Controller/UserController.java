@@ -1,7 +1,10 @@
 package com.Twitter.com.Controller;
 
 import com.Twitter.com.Model.*;
+import com.Twitter.com.Model.Enum.PostType;
+import com.Twitter.com.Model.dto.CreatePostRequest;
 import com.Twitter.com.Model.dto.Credential;
+import com.Twitter.com.Model.dto.LikeRequest;
 import com.Twitter.com.Model.dto.PostDto;
 import com.Twitter.com.Services.FollowService;
 import com.Twitter.com.Services.UserService;
@@ -61,7 +64,7 @@ public class UserController {
             description = "Allow users to create a new post on the Twitter clone platform.",
             tags = {"User Management"}
     )
-    private String CreatePost(@RequestBody Post post, @RequestParam String email) {
+    private String CreatePost(@RequestBody CreatePostRequest post, @RequestParam String email) {
         return userService.CreatePost(post, email);
     }
 
@@ -75,6 +78,18 @@ public class UserController {
                                   @RequestParam(defaultValue = "0") int page,
                                   @RequestParam(defaultValue = "10") int size) {
         return userService.showPost(email, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "time")));
+    }
+
+    @GetMapping("/feed")
+    @Operation(
+            summary = "Show All Posts",
+            description = "Retrieve all posts from all users with optional media type filter (TEXT, IMAGE, VIDEO, GIF).",
+            tags = {"User Management"}
+    )
+    public Page<PostDto> showAllPosts(@RequestParam(defaultValue = "0") int page,
+                                      @RequestParam(defaultValue = "10") int size,
+                                      @RequestParam(required = false) PostType type) {
+        return userService.showAllPosts(type, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "postId")));
     }
 
     @DeleteMapping("/deletepost")
@@ -93,7 +108,7 @@ public class UserController {
             description = "Allow users to add a like to a post using the user's email.",
             tags = {"User Management"}
     )
-    private String addLike(@RequestBody Like like, @RequestParam String likeEmail) {
+    private String addLike(@RequestBody LikeRequest like, @RequestParam String likeEmail) {
         return userService.addLike(like, likeEmail);
     }
 

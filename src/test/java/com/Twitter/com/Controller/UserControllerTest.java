@@ -1,6 +1,7 @@
 package com.Twitter.com.Controller;
 
-import com.Twitter.com.Model.Post;
+import com.Twitter.com.Model.Enum.PostType;
+import com.Twitter.com.Model.dto.CreatePostRequest;
 import com.Twitter.com.Model.dto.Credential;
 import com.Twitter.com.Model.dto.PostDto;
 import com.Twitter.com.Services.FollowService;
@@ -94,8 +95,8 @@ class UserControllerTest {
     @Test
     void showPostReturnsPagedList() throws Exception {
         List<PostDto> posts = Arrays.asList(
-                new PostDto("t1", "d1", "u1", "now", "alice"),
-                new PostDto("t2", "d2", "u2", "later", "bob")
+                new PostDto("t1", "d1", "u1", "now", "alice", PostType.TEXT),
+                new PostDto("t2", "d2", "u2", "later", "bob", PostType.IMAGE)
         );
         Mockito.when(userService.showPost(Mockito.eq("test@example.com"), Mockito.any()))
                 .thenReturn(new PageImpl<>(posts, PageRequest.of(0, 10), posts.size()));
@@ -108,7 +109,7 @@ class UserControllerTest {
 
     @Test
     void createPostDelegates() throws Exception {
-        Mockito.when(userService.CreatePost(any(Post.class), eq("test@example.com")))
+        Mockito.when(userService.CreatePost(any(CreatePostRequest.class), eq("test@example.com")))
                 .thenReturn("Post Upload Successfully");
 
         mockMvc.perform(post("/user/post")

@@ -1,5 +1,6 @@
 package com.Twitter.com.Model.dto;
 
+import com.Twitter.com.Model.Enum.PostType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,4 +14,5 @@ public class PostDto {
     public String url;
     public String time;
     private String userName;
+    private PostType postType;
 }

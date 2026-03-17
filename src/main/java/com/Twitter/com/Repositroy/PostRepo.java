@@ -1,5 +1,6 @@
 package com.Twitter.com.Repositroy;
 
+import com.Twitter.com.Model.Enum.PostType;
 import com.Twitter.com.Model.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.Page;
@@ -12,4 +13,5 @@ import java.util.List;
 public interface PostRepo extends JpaRepository<Post, Integer> {
     List<Post> findByPostOwnerUserEmail(String email);
     Page<Post> findByPostOwnerUserEmail(String email, Pageable pageable);
+    Page<Post> findByPostType(PostType postType, Pageable pageable);
 }

@@ -1,7 +1,11 @@
 package com.Twitter.com.Services;
 
+import com.Twitter.com.Model.Post;
 import com.Twitter.com.Model.User;
+import com.Twitter.com.Model.Enum.PostType;
+import com.Twitter.com.Model.dto.CreatePostRequest;
 import com.Twitter.com.Model.dto.Credential;
+import com.Twitter.com.Model.dto.LikeRequest;
 import com.Twitter.com.Repositroy.AdminRepo;
 import com.Twitter.com.Repositroy.PostRepo;
 import com.Twitter.com.Repositroy.UserRepo;
@@ -147,5 +151,90 @@ class UserServiceTest {
 
         assertEquals("Invalid or expired OTP", result);
         verify(userRepo, never()).save(any(User.class));
+    }
+
+    @Test
+    void createPostRejectsWhenUserNotLoggedIn() {
+        String email = "test@example.com";
+        User user = new User();
+        user.setStatus("logout");
+        when(userRepo.findByUserEmail(email)).thenReturn(user);
+
+        CreatePostRequest req = new CreatePostRequest();
+        req.setTitle("title");
+
+        String result = userService.CreatePost(req, email);
+
+        assertEquals("Please signIn first", result);
+        verify(postService, never()).CreatePost(any(Post.class));
+        assertEquals(0, user.getTotal());
+    }
+
+    @Test
+    void createPostSetsOwnerAndIncrementsTotal() {
+        String email = "test@example.com";
+        User user = new User();
+        user.setStatus("login");
+        when(userRepo.findByUserEmail(email)).thenReturn(user);
+
+        CreatePostRequest req = new CreatePostRequest();
+        req.setTitle("title");
+        req.setDescription("desc");
+        req.setUrl("http://u");
+        req.setPostType(PostType.IMAGE);
+
+        ArgumentCaptor<Post> postCaptor = ArgumentCaptor.forClass(Post.class);
+        when(postService.CreatePost(any(Post.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        String result = userService.CreatePost(req, email);
+
+        assertEquals("Post Upload Successfully", result);
+        verify(postService).CreatePost(postCaptor.capture());
+        Post saved = postCaptor.getValue();
+        assertEquals(user, saved.getPostOwner());
+        assertEquals("title", saved.getTitle());
+        assertEquals("desc", saved.getDescription());
+        assertEquals("http://u", saved.getUrl());
+        assertEquals(PostType.IMAGE, saved.getPostType());
+        assertEquals(1, user.getTotal());
+    }
+
+    @Test
+    void addLikeFailsWhenNotLoggedIn() {
+        String email = "test@example.com";
+        User user = new User();
+        user.setStatus("logout");
+        when(userRepo.findByUserEmail(email)).thenReturn(user);
+
+        LikeRequest likeRequest = new LikeRequest();
+        likeRequest.setPostId(1);
+
+        String result = userService.addLike(likeRequest, email);
+
+        assertEquals("Please signIn first", result);
+        verify(likeService, never()).addLike(any());
+    }
+
+    @Test
+    void addLikeSucceedsAndCreatesLike() {
+        String email = "test@example.com";
+        User user = new User();
+        user.setStatus("login");
+        when(userRepo.findByUserEmail(email)).thenReturn(user);
+
+        Post post = new Post();
+        post.setPostId(1);
+        when(postService.getPostById(1)).thenReturn(post);
+        when(postService.validatePost(post)).thenReturn(true);
+        when(likeService.isLikeAllowedOnThisPost(post, user)).thenReturn(true);
+        when(likeService.addLike(any())).thenReturn("Twitter post liked successfully!!!");
+
+        LikeRequest likeRequest = new LikeRequest();
+        likeRequest.setPostId(1);
+
+        String result = userService.addLike(likeRequest, email);
+
+        assertEquals("Twitter post liked successfully!!!", result);
+        verify(likeService).addLike(any());
     }
 }

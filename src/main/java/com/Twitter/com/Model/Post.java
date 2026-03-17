@@ -1,8 +1,10 @@
 package com.Twitter.com.Model;
 
+import com.Twitter.com.Model.Enum.PostType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CurrentTimestamp;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -16,13 +18,20 @@ public class Post {
     public String title;
     public String description;
     public String url;
+    @Enumerated(EnumType.STRING)
+    private PostType postType;
 
+
+    @CurrentTimestamp
     public String time;
 
     @PrePersist
     private void prePersist() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // Define your desired date/time format
         this.time = sdf.format(new Date(System.currentTimeMillis()));
+        if (this.postType == null) {
+            this.postType = PostType.TEXT;
+        }
     }
 
     @ManyToOne

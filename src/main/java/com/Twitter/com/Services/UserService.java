@@ -1,7 +1,10 @@
 package com.Twitter.com.Services;
 
 import com.Twitter.com.Model.*;
+import com.Twitter.com.Model.Enum.PostType;
+import com.Twitter.com.Model.dto.CreatePostRequest;
 import com.Twitter.com.Model.dto.Credential;
+import com.Twitter.com.Model.dto.LikeRequest;
 import com.Twitter.com.Model.dto.PostDto;
 import com.Twitter.com.Repositroy.AdminRepo;
 import com.Twitter.com.Repositroy.PostRepo;
@@ -72,16 +75,25 @@ public class UserService {
         return "User Signed out successfully";
     }
 
-    public String CreatePost(Post post, String email) {
+    public String CreatePost(CreatePostRequest createRequest, String email) {
         User user = userRepo.findByUserEmail(email);
-        if (user.getStatus().equals("login")) {
-            User postOwner = userRepo.findByUserEmail(email);
-            post.setPostOwner(postOwner);
-            postOwner.setTotal(postOwner.getTotal() + 1);
-            postService.CreatePost(post);
-        } else {
+        if (user == null || !"login".equalsIgnoreCase(user.getStatus())) {
             return "Please signIn first";
         }
+
+        if (user.getTotal() == null) {
+            user.setTotal(0);
+        }
+
+        Post post = new Post();
+        post.setTitle(createRequest.getTitle());
+        post.setDescription(createRequest.getDescription());
+        post.setUrl(createRequest.getUrl());
+        post.setPostType(createRequest.getPostType());
+        post.setPostOwner(user);
+
+        user.setTotal(user.getTotal() + 1);
+        postService.CreatePost(post);
         return "Post Upload Successfully";
     }
 
@@ -97,20 +109,24 @@ public class UserService {
     }
 
 
-    public String addLike(Like like, String likeEmail) {
-        Post twitterPost = like.getTwitterPost();
-        boolean postValid = postService.validatePost(twitterPost);
+    public String addLike(LikeRequest likeRequest, String likeEmail) {
+        User liker = userRepo.findByUserEmail(likeEmail);
+        if (liker == null || !"login".equalsIgnoreCase(liker.getStatus())) {
+            return "Please signIn first";
+        }
 
-        if (postValid) {
-            User liker = userRepo.findByUserEmail(likeEmail);
-            if (likeService.isLikeAllowedOnThisPost(twitterPost, liker)) {
-                like.setLiker(liker);
-                return likeService.addLike(like);
-            } else {
-                return "Already Liked!!";
-            }
-        } else {
+        Post twitterPost = postService.getPostById(likeRequest.getPostId());
+        if (twitterPost == null || !postService.validatePost(twitterPost)) {
             return "Cannot like on Invalid Post!!";
+        }
+
+        if (likeService.isLikeAllowedOnThisPost(twitterPost, liker)) {
+            Like like = new Like();
+            like.setTwitterPost(twitterPost);
+            like.setLiker(liker);
+            return likeService.addLike(like);
+        } else {
+            return "Already Liked!!";
         }
     }
 
@@ -250,7 +266,12 @@ public class UserService {
 
     public Page<PostDto> showPost(String email, Pageable pageable) {
         Page<Post> posts = postService.getPostsByOwnerEmail(email, pageable);
-        return posts.map(post -> new PostDto(post.getTitle(), post.getDescription(), post.getUrl(), post.getTime(), post.getPostOwner().getUserName()));
+        return posts.map(post -> new PostDto(post.getTitle(), post.getDescription(), post.getUrl(), post.getTime(), post.getPostOwner().getUserName(), post.getPostType()));
+    }
+
+    public Page<PostDto> showAllPosts(PostType type, Pageable pageable) {
+        Page<Post> posts = postService.getAllPosts(type, pageable);
+        return posts.map(post -> new PostDto(post.getTitle(), post.getDescription(), post.getUrl(), post.getTime(), post.getPostOwner().getUserName(), post.getPostType()));
     }
 
     public User getUserById(Long userId) {
