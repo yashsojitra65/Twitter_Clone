@@ -38,6 +38,7 @@ public class User {
 
     private String status;
 
+    @Column(name = "total_post")
     private int total=0;
     @Transient
     private String otp;

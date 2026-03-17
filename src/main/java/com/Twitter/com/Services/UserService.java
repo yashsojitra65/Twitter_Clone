@@ -1,6 +1,8 @@
 package com.Twitter.com.Services;
 
 import com.Twitter.com.Model.*;
+import com.Twitter.com.Model.Enum.PostType;
+import com.Twitter.com.Model.dto.CreatePostRequest;
 import com.Twitter.com.Model.dto.Credential;
 import com.Twitter.com.Model.dto.PostDto;
 import com.Twitter.com.Repositroy.AdminRepo;
@@ -72,16 +74,21 @@ public class UserService {
         return "User Signed out successfully";
     }
 
-    public String CreatePost(Post post, String email) {
+    public String CreatePost(CreatePostRequest createRequest, String email) {
         User user = userRepo.findByUserEmail(email);
-        if (user.getStatus().equals("login")) {
-            User postOwner = userRepo.findByUserEmail(email);
-            post.setPostOwner(postOwner);
-            postOwner.setTotal(postOwner.getTotal() + 1);
-            postService.CreatePost(post);
-        } else {
+        if (user == null || !"login".equalsIgnoreCase(user.getStatus())) {
             return "Please signIn first";
         }
+
+        Post post = new Post();
+        post.setTitle(createRequest.getTitle());
+        post.setDescription(createRequest.getDescription());
+        post.setUrl(createRequest.getUrl());
+        post.setPostType(createRequest.getPostType());
+        post.setPostOwner(user);
+
+        user.setTotal(user.getTotal() + 1);
+        postService.CreatePost(post);
         return "Post Upload Successfully";
     }
 
@@ -250,7 +257,12 @@ public class UserService {
 
     public Page<PostDto> showPost(String email, Pageable pageable) {
         Page<Post> posts = postService.getPostsByOwnerEmail(email, pageable);
-        return posts.map(post -> new PostDto(post.getTitle(), post.getDescription(), post.getUrl(), post.getTime(), post.getPostOwner().getUserName()));
+        return posts.map(post -> new PostDto(post.getTitle(), post.getDescription(), post.getUrl(), post.getTime(), post.getPostOwner().getUserName(), post.getPostType()));
+    }
+
+    public Page<PostDto> showAllPosts(PostType type, Pageable pageable) {
+        Page<Post> posts = postService.getAllPosts(type, pageable);
+        return posts.map(post -> new PostDto(post.getTitle(), post.getDescription(), post.getUrl(), post.getTime(), post.getPostOwner().getUserName(), post.getPostType()));
     }
 
     public User getUserById(Long userId) {
