@@ -1,6 +1,7 @@
 package com.Twitter.com.Controller;
 
 import com.Twitter.com.Model.Enum.PostType;
+import com.Twitter.com.Model.dto.FollowRequest;
 import com.Twitter.com.Model.dto.CreatePostRequest;
 import com.Twitter.com.Model.dto.Credential;
 import com.Twitter.com.Model.dto.PostDto;
@@ -118,5 +119,18 @@ class UserControllerTest {
                         .content("{\"title\":\"Hello\"}"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Post Upload Successfully"));
+    }
+
+    @Test
+    void followDelegates() throws Exception {
+        Mockito.when(userService.FollowUser(any(FollowRequest.class), eq("test@example.com")))
+                .thenReturn("ok");
+
+        mockMvc.perform(post("/user/follow")
+                        .param("followerEmail", "test@example.com")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"targetUserId\":2}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("ok"));
     }
 }

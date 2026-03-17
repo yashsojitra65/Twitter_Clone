@@ -5,6 +5,7 @@ import com.Twitter.com.Model.User;
 import com.Twitter.com.Model.Enum.PostType;
 import com.Twitter.com.Model.dto.CreatePostRequest;
 import com.Twitter.com.Model.dto.Credential;
+import com.Twitter.com.Model.dto.FollowRequest;
 import com.Twitter.com.Model.dto.LikeRequest;
 import com.Twitter.com.Repositroy.AdminRepo;
 import com.Twitter.com.Repositroy.PostRepo;
@@ -236,5 +237,61 @@ class UserServiceTest {
 
         assertEquals("Twitter post liked successfully!!!", result);
         verify(likeService).addLike(any());
+    }
+
+    @Test
+    void followUserFailsWhenNotLoggedIn() {
+        String email = "follower@example.com";
+        User follower = new User();
+        follower.setStatus("logout");
+        when(userRepo.findByUserEmail(email)).thenReturn(follower);
+
+        FollowRequest req = new FollowRequest();
+        req.setTargetUserId(2L);
+
+        String result = userService.FollowUser(req, email);
+
+        assertEquals("Please signIn first", result);
+        verify(followService, never()).startFollowing(any(), any());
+    }
+
+    @Test
+    void followUserFailsWhenTargetMissing() {
+        String email = "follower@example.com";
+        User follower = new User();
+        follower.setStatus("login");
+        when(userRepo.findByUserEmail(email)).thenReturn(follower);
+        when(userRepo.findById(99L)).thenReturn(java.util.Optional.empty());
+
+        FollowRequest req = new FollowRequest();
+        req.setTargetUserId(99L);
+
+        String result = userService.FollowUser(req, email);
+
+        assertEquals("User to be followed is Invalid!!!", result);
+        verify(followService, never()).startFollowing(any(), any());
+    }
+
+    @Test
+    void followUserSucceeds() {
+        String email = "follower@example.com";
+        User follower = new User();
+        follower.setStatus("login");
+        follower.setGetUserHandle("@me");
+        User target = new User();
+        target.setUserid(2L);
+        target.setGetUserHandle("@you");
+
+        when(userRepo.findByUserEmail(email)).thenReturn(follower);
+        when(userRepo.findById(2L)).thenReturn(java.util.Optional.of(target));
+        when(followService.isFollowAllowed(target, follower)).thenReturn(true);
+
+        FollowRequest req = new FollowRequest();
+        req.setTargetUserId(2L);
+
+        String result = userService.FollowUser(req, email);
+
+        assertEquals("@me is now following @you", result);
+        verify(followService).startFollowing(any(), eq(follower));
     }
 }

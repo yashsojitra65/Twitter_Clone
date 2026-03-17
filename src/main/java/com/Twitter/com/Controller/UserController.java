@@ -4,6 +4,7 @@ import com.Twitter.com.Model.*;
 import com.Twitter.com.Model.Enum.PostType;
 import com.Twitter.com.Model.dto.CreatePostRequest;
 import com.Twitter.com.Model.dto.Credential;
+import com.Twitter.com.Model.dto.FollowRequest;
 import com.Twitter.com.Model.dto.LikeRequest;
 import com.Twitter.com.Model.dto.PostDto;
 import com.Twitter.com.Services.FollowService;
@@ -159,7 +160,7 @@ public class UserController {
             description = "Allow a user to follow another user on the Twitter clone platform.",
             tags = {"User Management"}
     )
-    public String FollowUser(@RequestBody Follow follow, @RequestParam String followerEmail) {
+    public String FollowUser(@RequestBody FollowRequest follow, @RequestParam String followerEmail) {
         return userService.FollowUser(follow, followerEmail);
     }
 
