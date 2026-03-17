@@ -2,6 +2,7 @@ package com.Twitter.com.Services;
 
 import com.Twitter.com.Model.*;
 import com.Twitter.com.Model.Enum.PostType;
+import com.Twitter.com.Model.dto.CommentRequest;
 import com.Twitter.com.Model.dto.CreatePostRequest;
 import com.Twitter.com.Model.dto.Credential;
 import com.Twitter.com.Model.dto.FollowRequest;
@@ -213,15 +214,23 @@ public class UserService {
         return targetEmail.equals(email) || followerEmail.equals(email);
     }
 
-    public String addComment(Comment comment, String commenterEmail) {
-        boolean postValid = postService.validatePost(comment.getTwitterPost());
-        if (postValid) {
-            User commenter = userRepo.findByUserEmail(commenterEmail);
-            comment.setCommenter(commenter);
-            return commentService.addComment(comment);
-        } else {
+    public String addComment(CommentRequest commentRequest, String commenterEmail) {
+        User commenter = userRepo.findByUserEmail(commenterEmail);
+        if (commenter == null || !"login".equalsIgnoreCase(commenter.getStatus())) {
+            return "Please signIn first";
+        }
+
+        Post post = postService.getPostById(commentRequest.getPostId());
+        if (post == null || !postService.validatePost(post)) {
             return "Cannot comment on Invalid Post!!";
         }
+
+        Comment comment = new Comment();
+        comment.setCommenter(commenter);
+        comment.setTwitterPost(post);
+        comment.setCommentBody(commentRequest.getText());
+
+        return commentService.addComment(comment);
     }
 
 

@@ -3,6 +3,7 @@ package com.Twitter.com.Services;
 import com.Twitter.com.Model.Post;
 import com.Twitter.com.Model.User;
 import com.Twitter.com.Model.Enum.PostType;
+import com.Twitter.com.Model.dto.CommentRequest;
 import com.Twitter.com.Model.dto.CreatePostRequest;
 import com.Twitter.com.Model.dto.Credential;
 import com.Twitter.com.Model.dto.FollowRequest;
@@ -293,5 +294,63 @@ class UserServiceTest {
 
         assertEquals("@me is now following @you", result);
         verify(followService).startFollowing(any(), eq(follower));
+    }
+
+    @Test
+    void addCommentFailsWhenNotLoggedIn() {
+        String email = "user@example.com";
+        User user = new User();
+        user.setStatus("logout");
+        when(userRepo.findByUserEmail(email)).thenReturn(user);
+
+        CommentRequest req = new CommentRequest();
+        req.setPostId(1);
+        req.setText("Nice");
+
+        String result = userService.addComment(req, email);
+
+        assertEquals("Please signIn first", result);
+        verify(commentService, never()).addComment(any());
+    }
+
+    @Test
+    void addCommentFailsWhenPostInvalid() {
+        String email = "user@example.com";
+        User user = new User();
+        user.setStatus("login");
+        when(userRepo.findByUserEmail(email)).thenReturn(user);
+        when(postService.getPostById(1)).thenReturn(null);
+
+        CommentRequest req = new CommentRequest();
+        req.setPostId(1);
+        req.setText("Nice");
+
+        String result = userService.addComment(req, email);
+
+        assertEquals("Cannot comment on Invalid Post!!", result);
+        verify(commentService, never()).addComment(any());
+    }
+
+    @Test
+    void addCommentSucceeds() {
+        String email = "user@example.com";
+        User user = new User();
+        user.setStatus("login");
+        when(userRepo.findByUserEmail(email)).thenReturn(user);
+
+        Post post = new Post();
+        post.setPostId(1);
+        when(postService.getPostById(1)).thenReturn(post);
+        when(postService.validatePost(post)).thenReturn(true);
+        when(commentService.addComment(any())).thenReturn("ok");
+
+        CommentRequest req = new CommentRequest();
+        req.setPostId(1);
+        req.setText("Nice");
+
+        String result = userService.addComment(req, email);
+
+        assertEquals("ok", result);
+        verify(commentService).addComment(any());
     }
 }
