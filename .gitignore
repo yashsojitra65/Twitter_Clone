@@ -1,8 +1,10 @@
+.gitignore
 HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+uploads
 
 ### STS ###
 .apt_generated
