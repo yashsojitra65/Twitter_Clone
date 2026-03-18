@@ -17,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.security.NoSuchAlgorithmException;
 
@@ -34,6 +36,8 @@ public class UserService {
     private final AdminRepo adminRepo;
     private final OtpService otpService;
     private final LoginStatusService loginStatusService;
+    @Autowired(required = false)
+    private MediaStorageService mediaStorageService;
 
     public String SignUp(User user) throws NoSuchAlgorithmException {
 
@@ -84,8 +88,23 @@ public class UserService {
         Post post = new Post();
         post.setTitle(createRequest.getTitle());
         post.setDescription(createRequest.getDescription());
-        post.setUrl(createRequest.getUrl());
-        post.setPostType(createRequest.getPostType());
+        PostType postType = createRequest.getPostType() != null ? createRequest.getPostType() : PostType.TEXT;
+        post.setPostType(postType);
+
+        String incomingUrl = createRequest.getUrl();
+        boolean shouldDownload = mediaStorageService != null &&
+                incomingUrl != null && !incomingUrl.isBlank() &&
+                (postType != PostType.TEXT || isHttpUrl(incomingUrl));
+
+        if (shouldDownload) {
+            try {
+                post.setUrl(mediaStorageService.storeFromUrl(incomingUrl));
+            } catch (IllegalStateException | IllegalArgumentException ex) {
+                return "Failed to save media: " + ex.getMessage();
+            }
+        } else {
+            post.setUrl(incomingUrl);
+        }
         post.setPostOwner(user);
 
         user.setTotalPost(user.getTotalPost() + 1);
@@ -288,12 +307,24 @@ public class UserService {
 
     public Page<PostDto> showPost(String email, Pageable pageable) {
         Page<Post> posts = postService.getPostsByOwnerEmail(email, pageable);
-        return posts.map(post -> new PostDto(post.getTitle(), post.getDescription(), post.getUrl(), post.getTime(), post.getPostOwner().getUserName(), post.getPostType()));
+        return posts.map(post -> new PostDto(
+                post.getTitle(),
+                post.getDescription(),
+                buildAccessibleUrl(post.getUrl()),
+                post.getTime(),
+                post.getPostOwner().getUserName(),
+                post.getPostType()));
     }
 
     public Page<PostDto> showAllPosts(PostType type, Pageable pageable) {
         Page<Post> posts = postService.getAllPosts(type, pageable);
-        return posts.map(post -> new PostDto(post.getTitle(), post.getDescription(), post.getUrl(), post.getTime(), post.getPostOwner().getUserName(), post.getPostType()));
+        return posts.map(post -> new PostDto(
+                post.getTitle(),
+                post.getDescription(),
+                buildAccessibleUrl(post.getUrl()),
+                post.getTime(),
+                post.getPostOwner().getUserName(),
+                post.getPostType()));
     }
 
     public User getUserById(Long userId) {
@@ -317,5 +348,23 @@ public class UserService {
             return "Blue tick was not set..";
         }
         return "user doesn't exist";
+    }
+
+    private String buildAccessibleUrl(String storedPath) {
+        if (storedPath == null || storedPath.isBlank()) {
+            return storedPath;
+        }
+        if (storedPath.startsWith("http://") || storedPath.startsWith("https://")) {
+            return storedPath;
+        }
+        String normalized = storedPath.startsWith("/") ? storedPath : "/" + storedPath;
+        return ServletUriComponentsBuilder
+                .fromCurrentContextPath()
+                .path(normalized)
+                .toUriString();
+    }
+
+    private boolean isHttpUrl(String url) {
+        return url.startsWith("http://") || url.startsWith("https://");
     }
 }
