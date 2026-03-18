@@ -88,7 +88,6 @@ class UserServiceTest {
         user.setUserPassword(PasswordEncrypter.hashPasswordWithStaticSecret("plain"));
         when(userRepo.existsByuserEmail("test@example.com")).thenReturn(true);
         when(userRepo.findByUserEmail("test@example.com")).thenReturn(user);
-        when(loginStatusService.isLoggedIn("test@example.com")).thenReturn(false);
 
         String result = userService.SignIn(credential);
 
@@ -137,7 +136,7 @@ class UserServiceTest {
 
         String result = userService.verifyOTP(email, "123456", "newpass");
 
-        assertEquals("PassWord Successfully Save", result);
+        assertEquals("Password Successfully Save", result);
         assertEquals(PasswordEncrypter.hashPasswordWithStaticSecret("newpass"), user.getUserPassword());
         verify(userRepo).save(user);
         verify(loginStatusService).markLogout(email);
@@ -164,9 +163,6 @@ class UserServiceTest {
         when(userRepo.findByUserEmail(email)).thenReturn(user);
         when(loginStatusService.isLoggedIn(email)).thenReturn(false);
 
-
-
-
         CreatePostRequest req = new CreatePostRequest();
         req.setTitle("title");
 
@@ -183,8 +179,6 @@ class UserServiceTest {
         User user = new User();
         when(userRepo.findByUserEmail(email)).thenReturn(user);
         when(loginStatusService.isLoggedIn(email)).thenReturn(true);
-
-
 
         CreatePostRequest req = new CreatePostRequest();
         req.setTitle("title");
@@ -254,7 +248,6 @@ class UserServiceTest {
         when(userRepo.findByUserEmail(email)).thenReturn(follower);
         when(loginStatusService.isLoggedIn(email)).thenReturn(false);
 
-
         FollowRequest req = new FollowRequest();
         req.setTargetUserId(2L);
 
@@ -271,7 +264,6 @@ class UserServiceTest {
         when(userRepo.findByUserEmail(email)).thenReturn(follower);
         when(userRepo.findById(99L)).thenReturn(java.util.Optional.empty());
         when(loginStatusService.isLoggedIn(email)).thenReturn(true);
-
 
         FollowRequest req = new FollowRequest();
         req.setTargetUserId(99L);
@@ -295,7 +287,6 @@ class UserServiceTest {
         when(userRepo.findById(2L)).thenReturn(java.util.Optional.of(target));
         when(followService.isFollowAllowed(target, follower)).thenReturn(true);
         when(loginStatusService.isLoggedIn(email)).thenReturn(true);
-
 
         FollowRequest req = new FollowRequest();
         req.setTargetUserId(2L);
@@ -331,7 +322,6 @@ class UserServiceTest {
         when(postService.getPostById(1)).thenReturn(null);
         when(loginStatusService.isLoggedIn(email)).thenReturn(true);
 
-
         CommentRequest req = new CommentRequest();
         req.setPostId(1);
         req.setText("Nice");
@@ -354,7 +344,6 @@ class UserServiceTest {
         when(postService.validatePost(post)).thenReturn(true);
         when(commentService.addComment(any())).thenReturn("ok");
         when(loginStatusService.isLoggedIn(email)).thenReturn(true);
-
 
         CommentRequest req = new CommentRequest();
         req.setPostId(1);

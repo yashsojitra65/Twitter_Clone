@@ -64,7 +64,7 @@ public class UserService {
 
     public String SignOut(String email) {
         User user = userRepo.findByUserEmail(email);
-        if (isLoggedIn(user)) {
+        if (isLoggedIn(user, email)) {
             loginStatusService.markLogout(email);
         } else {
             return "Please signIn first";
@@ -74,12 +74,11 @@ public class UserService {
 
     public String CreatePost(CreatePostRequest createRequest, String email) {
         User user = userRepo.findByUserEmail(email);
-        if (!isLoggedIn(user)) {
-            return "Please signIn first";
-        }
-
-        if (user.getTotalPost() == null) {
+        if (user != null && user.getTotalPost() == null) {
             user.setTotalPost(0);
+        }
+        if (!isLoggedIn(user, email)) {
+            return "Please signIn first";
         }
 
         Post post = new Post();
@@ -96,7 +95,7 @@ public class UserService {
 
     public String deletePost(Integer postId, String email) {
         User user = userRepo.findByUserEmail(email);
-        if (!isLoggedIn(user)) {
+        if (!isLoggedIn(user, email)) {
             return "Please signIn first";
         }
         if (user.getTotalPost() == null || user.getTotalPost() <= 0) {
@@ -110,7 +109,7 @@ public class UserService {
 
     public String addLike(LikeRequest likeRequest, String likeEmail) {
         User liker = userRepo.findByUserEmail(likeEmail);
-        if (!isLoggedIn(liker)) {
+        if (!isLoggedIn(liker, likeEmail)) {
             return "Please signIn first";
         }
 
@@ -171,7 +170,7 @@ public class UserService {
 
     public String FollowUser(FollowRequest followRequest, String followerEmail) {
         User follower = userRepo.findByUserEmail(followerEmail);
-        if (!isLoggedIn(follower)) {
+        if (!isLoggedIn(follower, followerEmail)) {
             return "Please signIn first";
         }
 
@@ -213,7 +212,7 @@ public class UserService {
 
     public String addComment(CommentRequest commentRequest, String commenterEmail) {
         User commenter = userRepo.findByUserEmail(commenterEmail);
-        if (!isLoggedIn(commenter)) {
+        if (!isLoggedIn(commenter, commenterEmail)) {
             return "Please signIn first";
         }
 
@@ -253,11 +252,15 @@ public class UserService {
         return postOwnerEmail.equals(email) || commentOwnerEmail.equals(email);
     }
 
-    private boolean isLoggedIn(User user) {
+    private boolean isLoggedIn(User user, String email) {
         if (user == null) {
             return false;
         }
-        return loginStatusService.isLoggedIn(user.getUserEmail());
+        String emailToCheck = user.getUserEmail() != null ? user.getUserEmail() : email;
+        if (emailToCheck == null) {
+            return false;
+        }
+        return loginStatusService.isLoggedIn(emailToCheck);
     }
 
     public String resetPassWord(String email) {
