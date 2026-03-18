@@ -1,0 +1,13 @@
+com\Twitter\com\Services\FollowServiceTest.class
+com\Twitter\com\Services\utility\OTPGeneratorTest.class
+com\Twitter\com\Controller\UserControllerTest.class
+com\Twitter\com\Services\UserServiceTest.class
+com\Twitter\com\Services\LikeServiceTest.class
+com\Twitter\com\Services\PostServiceTest.class
+com\Twitter\com\Services\AdminServiceTest.class
+com\Twitter\com\Controller\AdminControllerTest.class
+com\Twitter\com\Services\utility\PasswordEncrypterTest.class
+com\Twitter\com\Services\EmailServiceTest.class
+com\Twitter\com\TwitterApplicationTests.class
+com\Twitter\com\Services\OtpServiceTest.class
+com\Twitter\com\Services\CommentServiceTest.class
